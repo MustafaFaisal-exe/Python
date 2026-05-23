@@ -62,36 +62,132 @@ def mark(tries):
     else:
         print ("DRAW!!!")
 
+def AI_minmax(depth, isMaximizing):
+
+    # -----------------------------
+    # TERMINAL STATES
+    # -----------------------------
+    score = evaluate()
+
+    if score == 1:
+        return 10 - depth
+
+    if score == -1:
+        return depth - 10
+
+    # Draw
+    board_full = True
+
+    for cell in grid:
+        if cell != "    X" and cell != "    O":
+            board_full = False
+
+    if board_full:
+        return 0
+
+    # -----------------------------
+    # MAXIMIZING PLAYER (AI = O)
+    # -----------------------------
+    if isMaximizing:
+
+        bestScore = -999
+
+        for i in range(9):
+
+            # Empty cell
+            if grid[i] != "    X" and grid[i] != "    O":
+
+                # Save original value
+                temp = grid[i]
+
+                # Simulate AI move
+                grid[i] = "    O"
+
+                # Recursive call
+                score = AI_minmax(depth + 1, False)
+
+                # Undo move
+                grid[i] = temp
+
+                # Maximize
+                bestScore = max(bestScore, score)
+
+        return bestScore
+
+    # -----------------------------
+    # MINIMIZING PLAYER (HUMAN = X)
+    # -----------------------------
+    else:
+
+        bestScore = 999
+
+        for i in range(9):
+
+            # Empty cell
+            if grid[i] != "    X" and grid[i] != "    O":
+
+                # Save original value
+                temp = grid[i]
+
+                # Simulate Player move
+                grid[i] = "    X"
+
+                # Recursive call
+                score = AI_minmax(depth + 1, True)
+
+                # Undo move
+                grid[i] = temp
+
+                # Minimize
+                bestScore = min(bestScore, score)
+
+        return bestScore
+    
+def evaluate():
+
+    for combo in winner:
+
+        a = grid[combo[0] - 1]
+        b = grid[combo[1] - 1]
+        c = grid[combo[2] - 1]
+
+        # AI wins
+        if a == "    O" and b == "    O" and c == "    O":
+            return 1
+
+        # Player wins
+        if a == "    X" and b == "    X" and c == "    X":
+            return -1
+
+    return 0
+
 def AI(tries):
-    if tries == 9:
-        loc = random.choice(corners)
-        corners.pop(corners.index(loc))
-        return loc
-    elif tries == 8:
-        if grid[4] == "    5":
-            return 5
-        else:
-            loc =  random.choice(corners)
-            return loc
-    if tries < 8:
-        AI_win, index_AI = AI_check()
-        player_win, index_player = player_check()
-        if AI_win:
-            return index_AI
-        elif player_win:
-                return index_player
-        elif index_AI == -1:
-            if len(corners) <= 2:
-                loc = random.choice(sides)
-                while grid[loc - 1] == "    X" or grid[loc - 1] == "    O":
-                    loc = random.choice(sides)
-                sides.pop(sides.index(loc))
-            else:
-                loc = random.choice(corners)
-                while grid[loc - 1] == "    X" or grid[loc - 1] == "    O":
-                    loc = random.choice(corners)
-                corners.pop(corners.index(loc))
-            return loc
+
+    bestScore = -999
+    bestMove = -1
+
+    for i in range(9):
+
+        # Empty cell
+        if grid[i] != "    X" and grid[i] != "    O":
+
+            temp = grid[i]
+
+            # Try move
+            grid[i] = "    O"
+
+            score = AI_minmax(0, False)
+
+            # Undo move
+            grid[i] = temp
+
+            # Better move found
+            if score > bestScore:
+
+                bestScore = score
+                bestMove = i + 1
+
+    return bestMove
             
 def AI_check():
     possible_winner = False
