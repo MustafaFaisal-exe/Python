@@ -1,6 +1,5 @@
 from os import system, name
-import random
-
+import numpy as np
 def clear():
     if name == 'nt':
         _ = system('cls')
@@ -62,7 +61,7 @@ def mark(tries):
     else:
         print ("DRAW!!!")
 
-def AI_minmax(depth, isMaximizing):
+def AI_alpha_beta(depth, isMaximizing, alpha, beta):
 
     # -----------------------------
     # TERMINAL STATES
@@ -94,23 +93,23 @@ def AI_minmax(depth, isMaximizing):
 
         for i in range(9):
 
-            # Empty cell
             if grid[i] != "    X" and grid[i] != "    O":
 
-                # Save original value
                 temp = grid[i]
-
-                # Simulate AI move
                 grid[i] = "    O"
 
-                # Recursive call
-                score = AI_minmax(depth + 1, False)
+                score = AI_alpha_beta(depth + 1, False, alpha, beta)
 
-                # Undo move
                 grid[i] = temp
 
-                # Maximize
                 bestScore = max(bestScore, score)
+
+                # Update alpha
+                alpha = max(alpha, bestScore)
+
+                # Prune
+                if beta <= alpha:
+                    break
 
         return bestScore
 
@@ -123,23 +122,23 @@ def AI_minmax(depth, isMaximizing):
 
         for i in range(9):
 
-            # Empty cell
             if grid[i] != "    X" and grid[i] != "    O":
 
-                # Save original value
                 temp = grid[i]
-
-                # Simulate Player move
                 grid[i] = "    X"
 
-                # Recursive call
-                score = AI_minmax(depth + 1, True)
+                score = AI_alpha_beta(depth + 1, True, alpha, beta)
 
-                # Undo move
                 grid[i] = temp
 
-                # Minimize
                 bestScore = min(bestScore, score)
+
+                # Update beta
+                beta = min(beta, bestScore)
+
+                # Prune
+                if beta <= alpha:
+                    break
 
         return bestScore
     
@@ -176,7 +175,7 @@ def AI(tries):
             # Try move
             grid[i] = "    O"
 
-            score = AI_minmax(0, False)
+            score = AI_alpha_beta(0, False, np.inf, -1 * np.inf)
 
             # Undo move
             grid[i] = temp
