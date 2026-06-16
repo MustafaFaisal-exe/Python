@@ -12,5 +12,5 @@ __pycache__/
 # Environment variables
 .env
 
-#comma seperated variables
+# Comma seperated variables
 *.csv
